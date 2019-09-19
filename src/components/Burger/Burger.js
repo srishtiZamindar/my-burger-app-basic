@@ -4,26 +4,27 @@ import classes from './Burger.css';
 import BurgerIngredient from './BurgerIngredient/BurgerIngredient';
 
 const burger = (props) => {
-    // since the ingred. props coming from burgerbuilder.js is an object not an array we need to convert it to array
 
-    //this is a way to transform an object of key value pairs into an array of burger ingredients
-    //where the value of that object is important to decide how many ingredients are needed and the keys
-    //important for which type of ingredient needed.
+    let transformedIngredients = Object.keys(props.ingredients).map(igKey => {
+        return [...Array(props.ingredients[igKey])].map((_, i) => {
+            return <BurgerIngredient key={igKey + i} type={igKey} />;
+        });
+        //to pull out the values of inner arrays and trade one array only which contains all these values,we add .reduce
+    }).reduce((arr, el) => {
+        return arr.concat(el); // loop through the element and add to this array
+    }, []); // reduce is a built-in array function which allows us to transform an array into something else.    
+    // It takes a function as an input and this function receives two arguments passed in automatically by javascript,the previous value and the current value.
+    // The reduce method does not only accept these callback here which is executed on every element in this array we return here, it also accepts an initial value, like empty array []
+    if (transformedIngredients.length === 0) {
+        transformedIngredients = <p>Please start adding ingredients!</p>
+    }
 
-    //It has a keys method which extracts the keys of a given object and turns that into an array, so it gives you an array of the keys.
-    const transformedIngredients = Object.keys(props.ingredients).map(igKey => {
-        return [...Array(props.ingredients[igKey])].map((_, i) => {    // _ is for blank and i for index   // array(length) [ , ] array with two empty spaces
-            return <BurgerIngredient key={igKey + i} type={igKey} />;   // igKey is like salad and i is like 1 or 2
-        }); //maps the  object into an array of ingredients in the end
-    });
+    console.log(transformedIngredients);
 
-    // now we can return transformedingrd in place of chese and meat
     return (
         <div className={classes.Burger}>
             <BurgerIngredient type="bread-top" />
             {transformedIngredients}
-            {/* <BurgerIngredient type="cheese" />
-            <BurgerIngredient type="meat" /> */}
             <BurgerIngredient type="bread-bottom" />
         </div>
     );

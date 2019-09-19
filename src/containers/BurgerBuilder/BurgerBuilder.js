@@ -11,10 +11,10 @@ class BurgerBuilder extends Component {
 
     state = { 
         ingredients: { // this is an object not an array so cant use .map in Burger.js
-            salad: 1,
-            bacon: 1,
-            cheese: 2,
-            meat: 2
+            salad: 0,
+            bacon: 0,
+            cheese: 0,
+            meat: 0
         }
     }
 
