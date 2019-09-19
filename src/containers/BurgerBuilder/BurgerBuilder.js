@@ -27,7 +27,8 @@ class BurgerBuilder extends Component {
             meat: 0,
         },
         totalPrice: 4,
-        purchasable: false
+        purchasable: false,
+        purchasing: false //purchasing should be changed to false once this order now button was clicked so we add a new purchaseHandler
     }
 
     //to determine if wwe need to disable the order now button
@@ -86,6 +87,15 @@ class BurgerBuilder extends Component {
         this.updatePurchaseState(updatedIngredients);
     }
 
+    // this fails because the method is triggered through an event so wrong syntax, this wont refer to class here so use =>
+    //should be triggered when we click order now button
+    // purchaseHandler() {
+    //     this.setState({ purchasing: true }); // pass to buildcontrols
+    // }
+    purchaseHandler = () => {
+        this.setState({ purchasing: true }); // pass to buildcontrols
+    }
+
     render() {
         const disabledInfo = {
             ...this.state.ingredients
@@ -95,7 +105,8 @@ class BurgerBuilder extends Component {
         }
         return (
             <Aux>
-                <Modal>
+                <Modal show={this.state.purchasing}>
+                    {/* if purchasing is true the modal should be visible. */}
                     <OrderSummary ingredients={this.state.ingredients} />
                 </Modal>
                 <Burger ingredients={this.state.ingredients} />
@@ -104,6 +115,7 @@ class BurgerBuilder extends Component {
                     ingredientRemoved={this.removeIngredientHandler}
                     disabled={disabledInfo}
                     purchasable={this.state.purchasable}
+                    ordered={this.purchaseHandler}  //his method gets executed when we click the order now button
                     price={this.state.totalPrice} />
             </Aux>
         );
