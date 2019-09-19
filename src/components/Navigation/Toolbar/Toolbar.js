@@ -5,15 +5,14 @@ import Logo from '../../Logo/Logo';
 import NavigationItems from '../NavigationItems/NavigationItems';
 
 const toolbar = (props) => (
-    <header className={classes.Toolbar}> 
+    <header className={classes.Toolbar}>
         <div>MENU</div>
-        <Logo />
-        {/* <div>LOGO</div> */}
-        <nav>
+        <div className={classes.Logo}>
+            <Logo />
+        </div>
+        {/* <Logo height="80%"/> or we can use another approach to set height where div controlls the height */}
+        <nav className={classes.DesktopOnly}>
             <NavigationItems />
-            {/* <ul>
-                ...
-            </ul> */}
         </nav>
     </header>
 );
