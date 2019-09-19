@@ -14,6 +14,7 @@ const controls = [
 
 const buildControls = (props) => (
     <div className={classes.BuildControls}>
+        <p>Current Price: <strong>{props.price.toFixed(2)}</strong></p>
         {controls.map(ctrl => (
             <BuildControl
                 key={ctrl.label}
@@ -21,6 +22,8 @@ const buildControls = (props) => (
                 // type={ctrl.type} //this is an extra loop so we can omit this and add a funct below
                 // added={props.ingredientAdded}
                 added={() => props.ingredientAdded(ctrl.type)} // this added will be heard by onClick listener in buildcontrol in more button
+                removed={() => props.ingredientRemoved(ctrl.type)}
+                disabled={props.disabled[ctrl.type]}
             />
         ))}
     </div>

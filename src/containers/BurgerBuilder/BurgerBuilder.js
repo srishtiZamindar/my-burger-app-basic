@@ -8,9 +8,9 @@ import BuildControls from '../../components/Burger/BuildControls/BuildControls';
 //we typically name constants you want to use as global constants in all capital characters.
 const INGREDIENT_PRICES = {
     salad: 0.5,
-    cheese: 1.3,
-    meat: 0.7,
-    bacon: 0.4
+    bacon: 1.3,
+    cheese: 0.7,
+    meat: 0.4
 };
 
 class BurgerBuilder extends Component {
@@ -19,12 +19,13 @@ class BurgerBuilder extends Component {
     //     this.state = { ...}  //this because inside a method
     // }  or 
 
-    state = { 
+    state = {
         ingredients: { // this is an object not an array so cant use .map in Burger.js
             salad: 0,
+            bacon: 0,
             cheese: 0,
             meat: 0,
-            bacon: 0
+           
         },
         totalPrice: 4
     }
@@ -43,21 +44,42 @@ class BurgerBuilder extends Component {
         const priceAddition = INGREDIENT_PRICES[type];
         const oldPrice = this.state.totalPrice;
         const newPrice = oldPrice + priceAddition;
-        this.setState({totalPrice: newPrice, ingredients: updatedIngredients}); 
-
+        this.setState({ totalPrice: newPrice, ingredients: updatedIngredients });
     }
 
-    removeIngredientHandler = (type) => {
-        
+    removeIngredientHandler = (type) => {// hook this handler to LESS button on controls
+        // this below logic will throw an error when there is no ingrd to be removed as the value of salad becomes -1 and we cant create an array to render from a negative value.
+        // so we add and if condition
+        const oldCount = this.state.ingredients[type];
+        if (oldCount <= 0) {
+            return;  //return so that nothing happens
+        }// to pass some information about which button should be enabled and which button should be disabled to my build controls go to render and create disabledInfo
+        const updatedCount = oldCount - 1;
+        const updatedIngredients = {
+            ...this.state.ingredients
+        };
+        updatedIngredients[type] = updatedCount;
+        const priceDeduction = INGREDIENT_PRICES[type];
+        const oldPrice = this.state.totalPrice;
+        const newPrice = oldPrice - priceDeduction;
+        this.setState({ totalPrice: newPrice, ingredients: updatedIngredients });
     }
 
     render() {
+        const disabledInfo = {
+            ...this.state.ingredients // distributr the properties of this.state.ingrd which is the ingredients object in state above so copied  in an immutable way
+        };
+        for (let key in disabledInfo) {
+            disabledInfo[key] = disabledInfo[key] <= 0  // disabledInfo[key] is value of each key in ingrd object in state
+        } // this wil be true or false {salad: true, meat: false etc } so we need to know the type of control so we will use (ctrl.type)
         return (
             <Aux>
                 <Burger ingredients={this.state.ingredients} />
-                <BuildControls 
-                    ingredientAdded={this.addIngredientHandler}/>
-                {/* <div>Build Controls</div> */}
+                <BuildControls
+                    ingredientAdded={this.addIngredientHandler}
+                    ingredientRemoved={this.removeIngredientHandler} 
+                    disabled={disabledInfo}
+                    price={this.state.totalPrice}/>
             </Aux>
         );
     }
