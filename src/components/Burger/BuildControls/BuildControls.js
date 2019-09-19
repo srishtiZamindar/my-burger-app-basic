@@ -15,7 +15,13 @@ const controls = [
 const buildControls = (props) => (
     <div className={classes.BuildControls}>
         {controls.map(ctrl => (
-            <BuildControl key={ctrl.label}  label={ctrl.label}/>
+            <BuildControl
+                key={ctrl.label}
+                label={ctrl.label}
+                // type={ctrl.type} //this is an extra loop so we can omit this and add a funct below
+                // added={props.ingredientAdded}
+                added={() => props.ingredientAdded(ctrl.type)} // this added will be heard by onClick listener in buildcontrol in more button
+            />
         ))}
     </div>
 );
