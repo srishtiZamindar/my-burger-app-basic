@@ -4,8 +4,6 @@ import Aux from '../../hoc/Auxiliary';
 import Burger from '../../components/Burger/Burger';
 import BuildControls from '../../components/Burger/BuildControls/BuildControls';
 
-
-//we typically name constants you want to use as global constants in all capital characters.
 const INGREDIENT_PRICES = {
     salad: 0.5,
     bacon: 1.3,
@@ -25,35 +23,52 @@ class BurgerBuilder extends Component {
             bacon: 0,
             cheese: 0,
             meat: 0,
-           
         },
-        totalPrice: 4
+        totalPrice: 4,
+        purchasable: false
     }
 
-    // will receive type to know which type to add
-    addIngredientHandler = (type) => { // hook this handler to MORE button on controls
+    //to determine if wwe need to disable the order now button
+    // updatePurchaseState() {
+    //     // create a copy of ingrd
+    //     const ingredients = {
+    //         ...this.state.ingredients
+    //     };
+
+    updatePurchaseState(ingredients) { // ingredients passed to use updated ingrs for the handlers so we can use 'ingredients' instead of the copy we created above
+        // convert this object into an array again
+        const sum = Object.keys(ingredients)
+            .map(igKey => {
+                return ingredients[igKey] //igKey is salad, bacon and so on so we get number values
+            })
+            .reduce((sum, el) => {
+                return sum + el;
+            }, 0); // we call reduce not to flatten array but to get sum of all numbers
+        this.setState({ purchasable: sum > 0 });
+    }
+
+    addIngredientHandler = (type) => {
         const oldCount = this.state.ingredients[type];
         const updatedCount = oldCount + 1;
-        //state should be upgraded in an imutable way
         const updatedIngredients = {
-            ...this.state.ingredients  // ... to distribute the properties of old ingrd state to new object
+            ...this.state.ingredients
         };
         updatedIngredients[type] = updatedCount;
-        //this setState to update ingredients in state. 
-        // to update price we need to have a mapping of which ingredient costs what, so create constant, outside of the class but in the same file INGREDIENT_PRICES
         const priceAddition = INGREDIENT_PRICES[type];
         const oldPrice = this.state.totalPrice;
         const newPrice = oldPrice + priceAddition;
         this.setState({ totalPrice: newPrice, ingredients: updatedIngredients });
+        //to activate the order now button when adding ingrds
+        // this.updatePurchaseState(); // this will enable the ordernow button only after two ingrds are selected so we need to pass updatedingredients
+        //and pass ingredinet to the handler above
+        this.updatePurchaseState(updatedIngredients);
     }
 
-    removeIngredientHandler = (type) => {// hook this handler to LESS button on controls
-        // this below logic will throw an error when there is no ingrd to be removed as the value of salad becomes -1 and we cant create an array to render from a negative value.
-        // so we add and if condition
+    removeIngredientHandler = (type) => {
         const oldCount = this.state.ingredients[type];
         if (oldCount <= 0) {
-            return;  //return so that nothing happens
-        }// to pass some information about which button should be enabled and which button should be disabled to my build controls go to render and create disabledInfo
+            return;
+        }
         const updatedCount = oldCount - 1;
         const updatedIngredients = {
             ...this.state.ingredients
@@ -63,23 +78,28 @@ class BurgerBuilder extends Component {
         const oldPrice = this.state.totalPrice;
         const newPrice = oldPrice - priceDeduction;
         this.setState({ totalPrice: newPrice, ingredients: updatedIngredients });
+        //to de activate the order now button when adding ingrds
+        // this.updatePurchaseState(); // this will keep the order now button enabled even after removing all the ingrds so we need to pass updatedingredients 
+        //and pass ingredinet to the handler above
+        this.updatePurchaseState(updatedIngredients);
     }
 
     render() {
         const disabledInfo = {
-            ...this.state.ingredients // distributr the properties of this.state.ingrd which is the ingredients object in state above so copied  in an immutable way
+            ...this.state.ingredients
         };
         for (let key in disabledInfo) {
-            disabledInfo[key] = disabledInfo[key] <= 0  // disabledInfo[key] is value of each key in ingrd object in state
-        } // this wil be true or false {salad: true, meat: false etc } so we need to know the type of control so we will use (ctrl.type)
+            disabledInfo[key] = disabledInfo[key] <= 0
+        }
         return (
             <Aux>
                 <Burger ingredients={this.state.ingredients} />
                 <BuildControls
                     ingredientAdded={this.addIngredientHandler}
-                    ingredientRemoved={this.removeIngredientHandler} 
+                    ingredientRemoved={this.removeIngredientHandler}
                     disabled={disabledInfo}
-                    price={this.state.totalPrice}/>
+                    purchasable={this.state.purchasable}
+                    price={this.state.totalPrice} />
             </Aux>
         );
     }

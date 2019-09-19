@@ -26,6 +26,10 @@ const buildControls = (props) => (
                 disabled={props.disabled[ctrl.type]}
             />
         ))}
+        <button 
+        className={classes.OrderButton}
+        disabled={!props.purchasable} //disabled should be set to true if it's not purchasable.
+        >ORDER NOW</button>
     </div>
 );
 
