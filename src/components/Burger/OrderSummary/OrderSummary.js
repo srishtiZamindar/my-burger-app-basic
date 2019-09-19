@@ -1,6 +1,7 @@
 import React from 'react';
 
 import Aux from '../../../hoc/Auxiliary';
+import Button from '../../UI/Button/Button';
 
 const orderSummary = (props) => {
     //const ingredientSummary = props.ingredients; // this ingrd is in obj format an dnot in [] so transform, use object.keys
@@ -19,7 +20,12 @@ const orderSummary = (props) => {
             <ul>
                 {ingredientSummary}
             </ul>
+            <p><strong>Total Price: {props.price}</strong></p>
             <p>Contine to checkout?</p>
+            {/* <button>CANCEL</button>
+            <button>CONTINUE</button> we can now use our custom button comp */}
+            <Button btnType="Danger" clicked={props.purchaseCancelled}>CANCEL</Button>
+            <Button  btnType="Success" clicked={props.purchaseContinued}>CONTINUE</Button>
         </Aux>
     );
 };
