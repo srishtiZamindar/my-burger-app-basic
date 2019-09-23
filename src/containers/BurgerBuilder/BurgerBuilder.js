@@ -5,6 +5,7 @@ import Burger from '../../components/Burger/Burger';
 import BuildControls from '../../components/Burger/BuildControls/BuildControls';
 import Modal from '../../components/UI/Modal/Modal';
 import OrderSummary from '../../components/Burger/OrderSummary/OrderSummary';
+import axios from '../../axios-orders'; // we will use our configured object
 
 const INGREDIENT_PRICES = {
     salad: 0.5,
@@ -14,13 +15,9 @@ const INGREDIENT_PRICES = {
 };
 
 class BurgerBuilder extends Component {
-    // constructor(props) {
-    //     super(props);
-    //     this.state = { ...}  //this because inside a method
-    // }  or 
 
     state = {
-        ingredients: { // this is an object not an array so cant use .map in Burger.js
+        ingredients: {
             salad: 0,
             bacon: 0,
             cheese: 0,
@@ -28,25 +25,17 @@ class BurgerBuilder extends Component {
         },
         totalPrice: 4,
         purchasable: false,
-        purchasing: false //purchasing should be changed to false once this order now button was clicked so we add a new purchaseHandler
+        purchasing: false
     }
 
-    //to determine if wwe need to disable the order now button
-    // updatePurchaseState() {
-    //     // create a copy of ingrd
-    //     const ingredients = {
-    //         ...this.state.ingredients
-    //     };
-
-    updatePurchaseState(ingredients) { // ingredients passed to use updated ingrs for the handlers so we can use 'ingredients' instead of the copy we created above
-        // convert this object into an array again
+    updatePurchaseState(ingredients) {
         const sum = Object.keys(ingredients)
             .map(igKey => {
-                return ingredients[igKey] //igKey is salad, bacon and so on so we get number values
+                return ingredients[igKey];
             })
             .reduce((sum, el) => {
                 return sum + el;
-            }, 0); // we call reduce not to flatten array but to get sum of all numbers
+            }, 0);
         this.setState({ purchasable: sum > 0 });
     }
 
@@ -61,9 +50,6 @@ class BurgerBuilder extends Component {
         const oldPrice = this.state.totalPrice;
         const newPrice = oldPrice + priceAddition;
         this.setState({ totalPrice: newPrice, ingredients: updatedIngredients });
-        //to activate the order now button when adding ingrds
-        // this.updatePurchaseState(); // this will enable the ordernow button only after two ingrds are selected so we need to pass updatedingredients
-        //and pass ingredinet to the handler above
         this.updatePurchaseState(updatedIngredients);
     }
 
@@ -81,19 +67,11 @@ class BurgerBuilder extends Component {
         const oldPrice = this.state.totalPrice;
         const newPrice = oldPrice - priceDeduction;
         this.setState({ totalPrice: newPrice, ingredients: updatedIngredients });
-        //to de activate the order now button when adding ingrds
-        // this.updatePurchaseState(); // this will keep the order now button enabled even after removing all the ingrds so we need to pass updatedingredients 
-        //and pass ingredinet to the handler above
         this.updatePurchaseState(updatedIngredients);
     }
 
-    // this fails because the method is triggered through an event so wrong syntax, this wont refer to class here so use =>
-    //should be triggered when we click order now button
-    // purchaseHandler() {
-    //     this.setState({ purchasing: true }); // pass to buildcontrols
-    // }
     purchaseHandler = () => {
-        this.setState({ purchasing: true }); // pass to buildcontrols
+        this.setState({ purchasing: true });
     }
 
     purchaseCancelHandler = () => {
@@ -101,7 +79,25 @@ class BurgerBuilder extends Component {
     }
 
     purchaseContinueHandler = () => {
-        alert("You continue!");
+        const order = {
+            ingredients: this.state.ingredients,
+            price: this.state.totalPrice,
+            customer: {
+                name: "Srishti",
+                address: {
+                    street: "lane 17",
+                    zipCode: '34567',
+                    country: 'India'
+                },
+                email: 'test@test.com'
+            },
+            deliveryMethod: 'fastest'
+        }
+        //alert("You continue!");
+        // to store data, use post
+        axios.post('/orders.json', order)  // we add .json only for firebase node-name.jason
+            .then(response => console.log(response))
+            .catch(error => console.log(error));
     }
 
     render() {
@@ -114,7 +110,6 @@ class BurgerBuilder extends Component {
         return (
             <Aux>
                 <Modal show={this.state.purchasing} modalClosed={this.purchaseCancelHandler}>
-                    {/* if purchasing is true the modal should be visible. */}
                     <OrderSummary
                         ingredients={this.state.ingredients}
                         purchaseCancelled={this.purchaseCancelHandler}
@@ -128,7 +123,7 @@ class BurgerBuilder extends Component {
                     ingredientRemoved={this.removeIngredientHandler}
                     disabled={disabledInfo}
                     purchasable={this.state.purchasable}
-                    ordered={this.purchaseHandler}  //his method gets executed when we click the order now button
+                    ordered={this.purchaseHandler}
                     price={this.state.totalPrice} />
             </Aux>
         );
