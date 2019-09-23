@@ -1,61 +1,49 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 
 import Modal from '../../components/UI/Modal/Modal';
 import Aux from '../Auxiliary/Auxiliary';
-import { tsMethodSignature } from '@babel/types';
 
-// const withErrorHandler = (WrappedComponent, axios) => { //axios to see if it failed or not to setup a global error handler so we will convert this to class based comp
-//     return (props) => {  //it will be a function, withErrorHandler, and this should be a function which takes the wrapped component
-//         //as an input and which then returns a function which receives props and of course simply returns some JSX including the wrapped component,
-//         return (
-//             <Aux>
-//                 <Modal>
-//                     Something didn't work!
-//                 </Modal>
-//                 {/* return the wrapped component and distribute any props this component might receive on it  */}
-//                 <WrappedComponent {...props} />
-//             </Aux>
-//         );
-//     }
-// };
-
-const withErrorHandler = (WrappedComponent, axios) => { //axios to see if it failed or not to setup a global error handler so we will convert this to class based comp
-    return class extends Component{ // no class name since we dont use but we return it, so its a class factory
+const withErrorHandler = (WrappedComponent, axios) => {
+    return class extends Component {
         state = {
             error: null
         }
-        // we can setup axios listener
-        componentDidMount() { // waill mount will be called before the child components are rendered
-            axios.interceptors.request.use(req => {
-                this.setState({error: null}); //  here we will clear the error so that whenever I send a request, I don't have my error set up anymore,
-            return req;
+
+        componentDidMount() {
+            this.reqInterceptor = axios.interceptors.request.use(req => {
+                this.setState({ error: null });
+                return req;
             });
-            axios.interceptors.response.use( res => res, error => {       //response: not really use here so instead we pass null/ res) //lobal interceptor
-                //here we will show the eror modal; so we need state
-                this.setState({error: error}); //second error is coming back from firebase
+            this.resInterceptor = axios.interceptors.response.use(res => res, error => {
+                this.setState({ error: error });
             });
         }
 
-        errorConfirmedHandler = ()=> {
-            this.setState({error: null});
+        // to prevent memory leaks
+        componentWillUnmount() {
+           // console.log('WillUnmount', this.reqInterceptor, this.resInterceptor);
+            axios.interceptors.request.eject(this.reqInterceptor);
+            axios.interceptors.response.eject(this.resInterceptor);
+        }
+
+        errorConfirmedHandler = () => {
+            this.setState({ error: null });
         }
 
 
-        render () {
+        render() {
             return (
                 <Aux>
-                    <Modal 
+                    <Modal
                         show={this.state.error}
                         modalClosed={this.errorConfirmedHandler}>
-                        {/* Something didn't work! */}
                         {this.state.error ? this.state.error.message : null}
                     </Modal>
-                    {/* return the wrapped component and distribute any props this component might receive on it  */}
                     <WrappedComponent {...this.props} />
                 </Aux>
             );
         }
 
-    } 
+    }
 };
 export default withErrorHandler;
