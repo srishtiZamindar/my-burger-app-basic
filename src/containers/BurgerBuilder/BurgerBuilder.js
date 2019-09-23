@@ -19,18 +19,31 @@ const INGREDIENT_PRICES = {
 class BurgerBuilder extends Component {
 
     state = {
-        ingredients: {
-            salad: 0,
-            bacon: 0,
-            cheese: 0,
-            meat: 0,
-        },
+        ingredients:// { // this will be set to the firebase object
+            // salad: 0,
+            // bacon: 0,
+            // cheese: 0,
+            // meat: 0,
+            //}
+            null,
         totalPrice: 4,
         purchasable: false,
         purchasing: false,
-        loading: false //when true show spinner; when false show orderSummary
+        loading: false, //when true show spinner; when false show orderSummary
+        error: false
     }
 
+    // good place to fetch data
+    componentDidMount() {
+        axios.get('https://react-my-burger-14076.firebaseio.com/ingredients.json')
+            // response will contain ingredients object
+            .then(response => {
+                this.setState({ ingredients: response.data });
+            })
+            .catch(error => {
+                this.setState({ error: true });
+            });
+    }
     updatePurchaseState(ingredients) {
         const sum = Object.keys(ingredients)
             .map(igKey => {
@@ -117,27 +130,55 @@ class BurgerBuilder extends Component {
             disabledInfo[key] = disabledInfo[key] <= 0
         }
         //alt to spinner i.e order summary
-        let orderSummary = <OrderSummary
-            ingredients={this.state.ingredients}
-            purchaseCancelled={this.purchaseCancelHandler}
-            purchaseContinued={this.purchaseContinueHandler}
-            price={this.state.totalPrice.toFixed(2)} />
+        let orderSummary = null;
+        // let orderSummary = <OrderSummary
+        //     ingredients={this.state.ingredients}
+        //     purchaseCancelled={this.purchaseCancelHandler}
+        //     purchaseContinued={this.purchaseContinueHandler}
+        //     price={this.state.totalPrice.toFixed(2)} />
+
+        // if (this.state.loading) {
+        //     orderSummary = <Spinner />;
+        // }
+
+        let burger = this.state.error ? <p>Ingerdients can't be loaded!</p> : <Spinner />;
+        if (this.state.ingredients) {
+            burger = (
+                <Aux>
+                    <Burger ingredients={this.state.ingredients} />
+                    <BuildControls
+                        ingredientAdded={this.addIngredientHandler}
+                        ingredientRemoved={this.removeIngredientHandler}
+                        disabled={disabledInfo}
+                        purchasable={this.state.purchasable}
+                        ordered={this.purchaseHandler}
+                        price={this.state.totalPrice} />
+                </Aux>
+            ); // orderSummary if ingredients are set
+            orderSummary = <OrderSummary
+                ingredients={this.state.ingredients}
+                purchaseCancelled={this.purchaseCancelHandler}
+                purchaseContinued={this.purchaseContinueHandler}
+                price={this.state.totalPrice.toFixed(2)} />
+        } // override orderSummary again if loading was set  
         if (this.state.loading) {
             orderSummary = <Spinner />;
         }
+
         return (
             <Aux>
                 <Modal show={this.state.purchasing} modalClosed={this.purchaseCancelHandler}>
                     {orderSummary}
                 </Modal>
-                <Burger ingredients={this.state.ingredients} />
+                {burger}
+                {/* <Burger ingredients={this.state.ingredients} />
                 <BuildControls
                     ingredientAdded={this.addIngredientHandler}
                     ingredientRemoved={this.removeIngredientHandler}
                     disabled={disabledInfo}
                     purchasable={this.state.purchasable}
                     ordered={this.purchaseHandler}
-                    price={this.state.totalPrice} />
+                    price={this.state.totalPrice} /> */}
             </Aux>
         );
     }

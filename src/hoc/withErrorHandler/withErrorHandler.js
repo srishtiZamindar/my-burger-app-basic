@@ -25,7 +25,7 @@ const withErrorHandler = (WrappedComponent, axios) => { //axios to see if it fai
             error: null
         }
         // we can setup axios listener
-        componentWillUpdate() {
+        componentDidMount() { // waill mount will be called before the child components are rendered
             axios.interceptors.request.use(req => {
                 this.setState({error: null}); //  here we will clear the error so that whenever I send a request, I don't have my error set up anymore,
             return req;
